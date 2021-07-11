@@ -6,7 +6,7 @@
   |_|     \___/   \_/\_/   \___||_|   |___/|_| |_| \___||_||_||_|    |_|    \___/ |_|  |_||_| \___|
   ------------------------------------------------------------------------------------------------- #>
 # Coding by Sidney Zhang <zly@lyzhang.com>
-# Update 2020-08-27
+# Update 2019-11-09
 
 <#
   ===================================================================================================
@@ -16,7 +16,6 @@
 
 Import-Module posh-git
 Import-Module oh-my-posh
-Import-Module Get-ChildItemColor
 
 <#
   ===================================================================================================
@@ -24,10 +23,9 @@ Import-Module Get-ChildItemColor
   ===================================================================================================
 #>
 
-New-Variable -Name Download -Value ($HOME + "\Downloads") -Option Constant -Description "This is download folder."
+New-Variable -Name Download -Value ("D:\Downloads") -Option Constant -Description "This is download folder."
 New-Variable -Name APPDATA -Value ($HOME + "\AppData") -Option Constant -Description "This is appdata folder."
-New-Variable -Name CODE -Value "C:\WorkPlace\CodingOnline\" -Option Constant -Description "This is my coding work folder."
-New-Variable -Name GETSECRETS -Value "C:\Users\alfch\Documents\WindowsPowerShell\Modules\Get-Secret\getSecret.py" -Option Constant -Description "Script of get-Secrets."
+New-Variable -Name CODE -Value "D:\WorkPlace\0.Coding" -Option Constant -Description "This is my coding work folder."
 
 <#
   ===================================================================================================
@@ -36,6 +34,7 @@ New-Variable -Name GETSECRETS -Value "C:\Users\alfch\Documents\WindowsPowerShell
 #>
 <# --------------------------------------------General--------------------------------------------- #>
 
+function x { exit }
 function Read-UTF8 {
   [CmdletBinding()]
   param(
@@ -74,9 +73,7 @@ function Read-UTF8 {
     }
   }
 }
-
 function Get-Nowtime { Get-Date -Format "HH:mm" }
-
 function Get-ArchFile {
   Param (
     [ValidateSet("win","comp","cloud")]
@@ -93,11 +90,11 @@ function Get-ArchFile {
   Begin{
     switch ($fromserver) {
       "win" {
-        $here = "C:\Users\alfch\Downloads\"
+        $here = ""
         break
       }
       "comp" {
-        $here = "sidneyzhang@192.168.20.59:"
+        $here = "sidney@192.168.20.59:"
         break
       }
       "cloud" {
@@ -107,11 +104,11 @@ function Get-ArchFile {
     }
     switch ($toserver) {
       "win" {
-        $there = "C:\Users\alfch\Downloads\"
+        $there = "D:\archload"
         break
       }
       "comp" {
-        $there = "sidneyzhang@192.168.20.59:"
+        $there = "sidney@192.168.20.59:"
         break
       }
       "cloud" {
@@ -124,8 +121,15 @@ function Get-ArchFile {
     scp -r ($here+$fromfolder) ($there+$tofolder)
   }
 }
-
+function Get-ArchDLFiles { Get-ArchFile -f comp -t win -b ~\Downloads\ -e .\ }
+function Get-ToArch ($ccc) { Get-ArchFile -b $ccc -e ~/Downloads }
 function Get-Downloads { aria2c -s16 -x16 -k1M $args }
+function Get-Softlink ($target, $path) {
+  New-Item -Path (".\"+"$path") -ItemType SymbolicLink -Value $target
+}
+function Get-Hardlink ($target, $path) {
+  New-Item -Path (".\"+"$path") -ItemType HardLink -Value $target
+}
 
 <# -------------------------------------------Location--------------------------------------------- #>
 
@@ -133,15 +137,10 @@ function Set-coding { Set-Location $CODE }
 function Set-download { Set-Location $Download }
 function Set-AppData { Set-Location $APPDATA }
 
-<# ----------------------------------------------Git----------------------------------------------- #>
+<# -------------------------------------------QuickApp--------------------------------------------- #>
 
-function Get-gitadd
-{
-    git add .
-    git commit -S -m $args
-}
-
-function Get-gitpush { git push -u origin master }
+function py38 { py -3.8 }
+function ju { jupyter notebook }
 
 <#
   ===================================================================================================
@@ -149,16 +148,16 @@ function Get-gitpush { git push -u origin master }
   ===================================================================================================
 #>
 
+Set-Alias -Name cdco -Value Set-coding
+Set-Alias -Name cddo -Value Set-download
+Set-Alias -Name cdad -Value Set-AppData
+Set-Alias -Name mkslink -Value Get-Softlink
+Set-Alias -Name mkhlink -Value Get-Hardlink
 Set-Alias -Name cat8 -Value Read-UTF8
 Set-Alias -Name now -Value Get-Nowtime
-Set-Alias -Name arch -Value Get-ArchFile
-set-Alias -Name load -Value Get-Downloads
-
-If (-Not (Test-Path Variable:PSise)) {
-  function l { Get-ChildItemColor | Format-Wide }
-  Set-Alias la Get-ChildItem -option AllScope
-  Set-Alias ls Get-ChildItemColorFormatWide -option AllScope
-}
+Set-Alias -Name load -Value Get-Downloads
+Set-Alias -Name archdl -Value Get-ArchDLFiles
+Set-Alias -Name toarch -Value Get-ToArch
 
 <#
   ===================================================================================================
@@ -166,5 +165,21 @@ If (-Not (Test-Path Variable:PSise)) {
   ===================================================================================================
 #>
 
-Set-Theme Agnoster
-posh-winfetch
+Set-PoshPrompt -Theme agnoster
+Set-PSReadLineOption -Colors @{
+  Command            = 'Magenta'
+  Number             = 'DarkGray'
+  Member             = 'DarkGray'
+  Operator           = 'DarkGray'
+  Type               = 'DarkGray'
+  Variable           = 'DarkGreen'
+  Parameter          = 'DarkGreen'
+  ContinuationPrompt = 'DarkGray'
+  Default            = 'DarkGray'
+}
+If (-Not (Test-Path Variable:PSise)) {  # Only run this in the console and not in the ISE
+    Import-Module Get-ChildItemColor
+    
+    Set-Alias l Get-ChildItem -option AllScope
+    Set-Alias ls Get-ChildItemColorFormatWide -option AllScope
+}
