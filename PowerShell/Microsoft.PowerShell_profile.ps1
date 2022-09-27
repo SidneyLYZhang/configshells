@@ -6,7 +6,7 @@
   |_|     \___/   \_/\_/   \___||_|   |___/|_| |_| \___||_||_||_|    |_|    \___/ |_|  |_||_| \___|
   ------------------------------------------------------------------------------------------------- #>
 # Coding by Sidney Zhang <zly@lyzhang.com>
-# Update 2019-11-09
+# Update 2022-09-27
 
 <#
   ===================================================================================================
@@ -15,7 +15,7 @@
 #>
 
 Import-Module posh-git
-Import-Module oh-my-posh
+oh-my-posh init pwsh --config "~/.config/jblab_2021.omp.json" | Invoke-Expression
 
 <#
   ===================================================================================================
@@ -74,55 +74,6 @@ function Read-UTF8 {
   }
 }
 function Get-Nowtime { Get-Date -Format "HH:mm" }
-function Get-ArchFile {
-  Param (
-    [ValidateSet("win","comp","cloud")]
-    [Alias("f")]
-    $fromserver = "win",
-    [ValidateSet("win","comp","cloud")]
-    [Alias("t")]
-    $toserver = "comp",
-    [Alias("b")]
-    $fromfolder,
-    [Alias("e")]
-    $tofolder
-  )
-  Begin{
-    switch ($fromserver) {
-      "win" {
-        $here = ""
-        break
-      }
-      "comp" {
-        $here = "sidney@192.168.20.59:"
-        break
-      }
-      "cloud" {
-        $here = "root@47.99.100.104:"
-        break
-      }
-    }
-    switch ($toserver) {
-      "win" {
-        $there = "D:\archload"
-        break
-      }
-      "comp" {
-        $there = "sidney@192.168.20.59:"
-        break
-      }
-      "cloud" {
-        $there = "root@47.99.100.104:"
-        break
-      }
-    }
-  }
-  Process{
-    scp -r ($here+$fromfolder) ($there+$tofolder)
-  }
-}
-function Get-ArchDLFiles { Get-ArchFile -f comp -t win -b ~\Downloads\ -e .\ }
-function Get-ToArch ($ccc) { Get-ArchFile -b $ccc -e ~/Downloads }
 function Get-Downloads { aria2c -s16 -x16 -k1M $args }
 function Get-Softlink ($target, $path) {
   New-Item -Path (".\"+"$path") -ItemType SymbolicLink -Value $target
@@ -148,16 +99,11 @@ function ju { jupyter notebook }
   ===================================================================================================
 #>
 
-Set-Alias -Name cdco -Value Set-coding
-Set-Alias -Name cddo -Value Set-download
-Set-Alias -Name cdad -Value Set-AppData
 Set-Alias -Name mkslink -Value Get-Softlink
 Set-Alias -Name mkhlink -Value Get-Hardlink
 Set-Alias -Name cat8 -Value Read-UTF8
 Set-Alias -Name now -Value Get-Nowtime
 Set-Alias -Name load -Value Get-Downloads
-Set-Alias -Name archdl -Value Get-ArchDLFiles
-Set-Alias -Name toarch -Value Get-ToArch
 
 <#
   ===================================================================================================
@@ -165,18 +111,6 @@ Set-Alias -Name toarch -Value Get-ToArch
   ===================================================================================================
 #>
 
-Set-PoshPrompt -Theme agnoster
-Set-PSReadLineOption -Colors @{
-  Command            = 'Magenta'
-  Number             = 'DarkGray'
-  Member             = 'DarkGray'
-  Operator           = 'DarkGray'
-  Type               = 'DarkGray'
-  Variable           = 'DarkGreen'
-  Parameter          = 'DarkGreen'
-  ContinuationPrompt = 'DarkGray'
-  Default            = 'DarkGray'
-}
 If (-Not (Test-Path Variable:PSise)) {  # Only run this in the console and not in the ISE
     Import-Module Get-ChildItemColor
     

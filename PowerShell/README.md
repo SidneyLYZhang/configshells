@@ -4,13 +4,10 @@
 
 ```powershell
 Import-Module posh-git
-Import-Module oh-my-posh
 Import-Module Get-ChildItemColor
-Import-Module PlusGeneral
 ```
 
 PlusGeneral 是我自己写的常用命令包。
-以及脚本 ： posh-winfetch 。
 
 以上！Update： 2020-10-28
 
@@ -21,3 +18,7 @@ PlusGeneral 是我自己写的常用命令包。
 
 另外，Nerd Font字体尽量选择FiraCode Nerd Font Mono，因为我试了好几个就这个和Windows Terminal之间，
 兼容最好。 
+
+# UPDATE NEW 2022-09-27
+
+`oh-my-posh` 更换了安装方式和处理方式。并且去掉了一些不爱用的配置。
